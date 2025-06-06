@@ -1,15 +1,12 @@
 {
-  "name": "apollo-node-client",
-  "version": "1.4.3",
+  "name": "apollo-node-client-rsa",
+  "version": "1.4.7",
   "description": "Node.js Client for Apollo",
-  "author": "zhangxh1023",
-  "email": "zhangxh1023@gmail.com",
-  "url": "https://github.com/zhangxh1023/apollo-node-client",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git@github.com:zhangxh1023/apollo-node-client.git"
+    "url": "git@github.com:apenft-org/apollo-node-client.git"
   },
   "files": [
     "dist"
@@ -44,6 +41,8 @@
     "typescript": "^4.8.3"
   },
   "dependencies": {
+    "@originjs/crypto-js-wasm": "^1.1.1",
+    "apollo-node-client": "link:",
     "node-fetch": "^2.6.9",
     "query-string": "^7.1.3"
   }

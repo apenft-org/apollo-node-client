@@ -129,7 +129,7 @@ describe('test config request', () => {
         res.setHeader('Content-Type', 'application/json;charset=UTF-8');
         res.end(JSON.stringify(fetchConfigResp));
       };
-      const resp = await Request.fetchConfig(paramConfigUrl);
+      const resp = await Request.fetchConfig(paramConfigUrl,undefined);
       expect(resp).toStrictEqual(fetchConfigResp);
     });
     it('should throw server error', async () => {
@@ -137,7 +137,7 @@ describe('test config request', () => {
         res.statusCode = 500;
         res.end(JSON.stringify(fetchConfigResp));
       };
-      await expect(Request.fetchConfig(paramConfigUrl)).rejects.toThrowErrorMatchingInlineSnapshot('"Http request error: 500, Internal Server Error"');
+      await expect(Request.fetchConfig(paramConfigUrl,undefined)).rejects.toThrowErrorMatchingInlineSnapshot('"Http request error: 500, Internal Server Error"');
     });
     it('should receive http headers', async () => {
       mockHttpHandle = (req, res): void => {
@@ -148,7 +148,7 @@ describe('test config request', () => {
       const headers = {
         header1: '1'
       };
-      await expect(Request.fetchConfig(paramConfigUrl, headers)).resolves.toStrictEqual(fetchConfigResp);
+      await expect(Request.fetchConfig(paramConfigUrl, undefined,headers)).resolves.toStrictEqual(fetchConfigResp);
     });
   });
 });
@@ -193,7 +193,7 @@ describe('test notification request', () => {
         res.statusCode = 500;
         res.end(JSON.stringify(fetchNotificationsResp));
       };
-      await expect(Request.fetchConfig(paramNotificationUrl)).rejects.toThrowErrorMatchingInlineSnapshot('"Http request error: 500, Internal Server Error"');
+      await expect(Request.fetchConfig(paramNotificationUrl,undefined)).rejects.toThrowErrorMatchingInlineSnapshot('"Http request error: 500, Internal Server Error"');
     });
     it('should receive http headers', async () => {
       mockHttpHandle = (req, res): void => {
@@ -204,7 +204,7 @@ describe('test notification request', () => {
       const headers = {
         header1: '1'
       };
-      await expect(Request.fetchConfig(paramNotificationUrl, headers)).resolves.toStrictEqual(fetchNotificationsResp);
+      await expect(Request.fetchConfig(paramNotificationUrl, undefined,headers)).resolves.toStrictEqual(fetchNotificationsResp);
     });
   });
 });
