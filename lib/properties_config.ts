@@ -45,7 +45,7 @@ export class PropertiesConfig extends Config implements ConfigInterface {
   }
 
   public async _loadAndUpdateConfig(url: string, headers: AuthHeader | undefined): Promise<void> {
-    const loadConfigResp = await Request.fetchConfig<KVConfigContentType>(url, headers);
+    const loadConfigResp = await Request.fetchConfig<KVConfigContentType>(url, this.getConfigOptions().privateKey, headers);
     if (loadConfigResp) {
       // diff change
       const { added, deleted, changed } = this.diffMap(this.configs, loadConfigResp.configurations);

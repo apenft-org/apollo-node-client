@@ -64,7 +64,7 @@ export class JSONConfig extends Config implements ConfigInterface {
   }
 
   public async _loadAndUpdateConfig(url: string, headers: AuthHeader | undefined): Promise<void> {
-    const loadConfigResp = await Request.fetchConfig<ConfigContentType>(url, headers);
+    const loadConfigResp = await Request.fetchConfig<ConfigContentType>(url, this.getConfigOptions().privateKey, headers);
     if (loadConfigResp) {
       const content = loadConfigResp.configurations.content;
       if (content) {
