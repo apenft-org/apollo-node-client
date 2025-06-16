@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import CryptoJSW from '@originjs/crypto-js-wasm';
+import forge from 'node-forge';
 
 function split(buffer: Buffer, size: number): Buffer[] {
   const chunks: Buffer[] = [];
@@ -15,47 +15,38 @@ function split(buffer: Buffer, size: number): Buffer[] {
  */
 export class RSAUtil {
 
-  static async decrypt(SecretKey: string, encryptedData: Buffer): Promise<string> {
+  static decrypt(secretKey, encryptedData): string {
+    // Decode the Base64 secret key
+    const raw = Buffer.from(secretKey, 'base64');
 
-    // 解码 Base64 私钥
-    const raw = Buffer.from(SecretKey, 'base64');
-
-    // 创建私钥对象
+    // Create a private key object
     const privateKey = crypto.createPrivateKey({
       key: raw,
       format: 'der',
       type: 'pkcs8'
     });
 
+
     const pem = privateKey.export({
-      type:'pkcs8',
-      format:'pem'
+      type: 'pkcs8',
+      format: 'pem'
     });
 
-    await CryptoJSW.RSA.loadWasm();
-    const config = {
-      encryptPadding: 'OAEP',
-      signPadding: 'PSS',
-      hashAlgo: 'md5',
-      key: pem.toString(),
-      isPublicKey: false
-    };
-
-    CryptoJSW.RSA.updateConfig(config);
-
     // 解密数据
-    const decryptedChunks: Uint8Array[] = [];
+    let decryptedChunks = '';
     const partLen = 512; // 计算部分长度
 
     const chunks = split(encryptedData, partLen);
+
+    const pki = forge.pki;
+    const rsa = pki.privateKeyFromPem(pem);
+
     for (const chunk of chunks) {
-      const decrypted = CryptoJSW.RSA.decrypt(chunk, {encryptPadding: 'pkcs1v15',});
-      decryptedChunks.push(decrypted);
+      const decryptedData = rsa.decrypt(chunk, 'RSAES-PKCS1-V1_5');
+      console.log(decryptedData);
+      decryptedChunks += decryptedData;
     }
-
-    // 合并解密后的数据
-    const result = Buffer.concat(decryptedChunks);
-    return result.toString();
-
+    return decryptedChunks;
   }
+
 }

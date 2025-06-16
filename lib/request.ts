@@ -1,6 +1,6 @@
-import fetch, { HeadersInit } from 'node-fetch';
-import { stringify } from 'query-string';
-import { ConfigInterface } from './configInterface';
+import fetch, {HeadersInit} from 'node-fetch';
+import {stringify} from 'query-string';
+import {ConfigInterface} from './configInterface';
 import {RSAUtil} from './RSAUtil';
 
 export type ConfigUrlOptions = {
@@ -38,7 +38,7 @@ export type LoadConfigResp<T> = {
 
 export class Request {
   public static formatConfigUrl(urlOptions: ConfigUrlOptions): string {
-    const { appId, clusterName, namespaceName, configServerUrl, releaseKey, ip } = urlOptions;
+    const {appId, clusterName, namespaceName, configServerUrl, releaseKey, ip} = urlOptions;
     const url = configServerUrl.endsWith('/') ? configServerUrl.substring(0, configServerUrl.length - 1) : configServerUrl;
     const params: ConfigQueryParam = Object.create(null);
     if (releaseKey) {
@@ -51,44 +51,48 @@ export class Request {
   }
 
   public static async fetchConfig<T>(url: string, headers?: HeadersInit): Promise<LoadConfigResp<T> | null> {
-    const response = await fetch(url, { headers });
+    const response = await fetch(url, {headers});
     const status = response.status;
-    let text = await response.text();
+    if (status === 304) return null;
+    if (status != 200) throw new Error(`Http request error: ${status}, ${response.statusText}`);
 
-    const responseHeaders = response.headers;
+    let text = '';
     // 由服务端来决定是否要加密
-    if(
-      (typeof responseHeaders['HTX_CRYPTO_ENABLE'] === 'string' && responseHeaders['HTX_CRYPTO_ENABLE'] === 'true')||
-      (typeof responseHeaders['APOLLO_SECRET_KEY'] === 'string' && responseHeaders['APOLLO_SECRET_KEY'] === 'true')||
-      (typeof responseHeaders['HEADER_ENCRYPT_FLAG'] === 'string' && responseHeaders['HEADER_ENCRYPT_FLAG'] === 'true')
-    ){
+    if (
+      (response.headers.has('HTX_CRYPTO_ENABLE') && response.headers.get('HTX_CRYPTO_ENABLE') === 'true')
+    ) {
       console.debug('apollo private key enabled.');
       const SecretKeyA = process.env.APOLLO_SECRET_KEY;
       const SecretKeyB = process.env.ApolloPrivateKey;
 
-      let privateKey;
-      if(SecretKeyA){
+      let privateKey: string;
+      if (SecretKeyA) {
         privateKey = SecretKeyA;
-      }else if(SecretKeyB){
+      } else if (SecretKeyB) {
         privateKey = SecretKeyB;
-      }else{
+      } else {
         throw new Error('no private key!!');
       }
-      const decrypt = await RSAUtil.decrypt(privateKey, Buffer.from(text));
+
+      const blob = await response.blob();
+      const arrayBuffer = await blob.arrayBuffer();
+      const binaryData = new Uint8Array(arrayBuffer);
+      // console.log('binaryData', binaryData);
+
+      const decrypt = RSAUtil.decrypt(privateKey, binaryData);
       // console.debug('decrypt',decrypt);
       text = decrypt;
+    } else {
+      text = await response.text();
+      // console.log(`text: ${text}`);
     }
-
-    if (status === 304) return null;
-    if (status != 200) throw new Error(`Http request error: ${status}, ${response.statusText}`);
     if (!text) return null;
-    console.log('fetchConfig',text);
+    // console.log('fetchConfig', text);
     return JSON.parse(text);
   }
 
-  public static formatNotificationsUrl(options: NotificationsUrlOptions,
-    configsMap: Map<string, ConfigInterface>): string {
-    const { configServerUrl, appId, clusterName } = options;
+  public static formatNotificationsUrl(options: NotificationsUrlOptions,configsMap: Map<string, ConfigInterface>): string {
+    const {configServerUrl, appId, clusterName} = options;
     const url = configServerUrl.endsWith('/') ? configServerUrl.substring(0, configServerUrl.length - 1) : configServerUrl;
     const notifications: Notification[] = [];
     for (const config of configsMap.values()) {
@@ -107,7 +111,7 @@ export class Request {
   }
 
   public static async fetchNotifications(url: string, headers?: HeadersInit): Promise<Notification[] | null> {
-    const response = await fetch(url, { headers, timeout: 70000 });
+    const response = await fetch(url, {headers, timeout: 70000});
     const status = response.status;
     const text = await response.text();
     if (status === 304) return null;
