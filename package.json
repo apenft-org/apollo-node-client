@@ -1,6 +1,6 @@
 {
   "name": "apollo-node-rsa",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "description": "Node.js Client for Apollo",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",

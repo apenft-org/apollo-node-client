@@ -148,7 +148,7 @@ describe('test config request', () => {
       const headers = {
         header1: '1'
       };
-      await expect(Request.fetchConfig(paramConfigUrl, undefined,headers)).resolves.toStrictEqual(fetchConfigResp);
+      await expect(Request.fetchConfig(paramConfigUrl,headers)).resolves.toStrictEqual(fetchConfigResp);
     });
   });
 });
@@ -204,7 +204,7 @@ describe('test notification request', () => {
       const headers = {
         header1: '1'
       };
-      await expect(Request.fetchConfig(paramNotificationUrl, undefined,headers)).resolves.toStrictEqual(fetchNotificationsResp);
+      await expect(Request.fetchConfig(paramNotificationUrl,headers)).resolves.toStrictEqual(fetchNotificationsResp);
     });
   });
 });
