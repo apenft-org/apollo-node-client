@@ -43,7 +43,7 @@ export class RSAUtil {
 
     for (const chunk of chunks) {
       const decryptedData = rsa.decrypt(chunk, 'RSAES-PKCS1-V1_5');
-      console.log(decryptedData);
+      // console.log(decryptedData);
       decryptedChunks += decryptedData;
     }
     return decryptedChunks;
